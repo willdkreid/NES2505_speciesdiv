@@ -8,52 +8,66 @@ runtime: shiny_prerendered
 library(learnr)
 library(mosaic)
 library(vegan)
-
+library(abdiv)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-
-
 ## Measuring biological diversity
 
-You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+The focus so far has been on analysing your data either with a statistical test or plotting your data to look at relationships, differences or patterns. But in biology and ecology, we often ask questions related to the distribution and contribution of different species to a community. We have seen with the ordination methods that we can reduced the dimensional of our species data into (relatively) easily interpretable figures where we can see sites are grouped together or that species close in ordination spaces are likely to co-occur. However, there times when it will be important to calculate a **diversity indices** for a sample, habitat or ecosystem. This often relates to understanding ecosystem health or monitoring complex communities over time and space. If our diversity metrics change in time and/ or space it will mean that the number of species and the relative abundance of these species are changing.
 
-```{r eruptions, echo=FALSE}
-inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
-  
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
-)
+Ecological communities are complex. It is important to examine the diversity of communities for different reasons:
 
-renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
-  
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
-})
+* monitoring
+* ecological studies
+* conservation
+* exploitation
+
+This means that we can start to ask questions related to what is driving the diversity of communities like:
+
+* what is the long-term impact of nutrient loading on the diversity of macroalgae in an estuary?
+* what is the relationship habitat heterogeneity and benthic diversity on the Antarctic Peninsula?
+* does MPA designation increase diversity and ecosystem health compared to unprotected areas?
+* what is the impact of a fisheries on pelagic diversity?
+
+### What is species diversity?
+
+Species diversity is an expression of community structure. Species diversity is split into two components: **species richness** and **species evenness**. Species richness is the total number of species in a quantified area or sample. Species evenness is the relative abundance of individuals within a community or sample. 
+
+We can show what we mean by species richness and species evenness in the figure of two fish communities below. There are five species of fish in each community but there are differences in evenness. Which one is more diverse?
+
+![](images/species_diversity1.png)
+
+The answer is the community on the right. This is because, although there is the same species rich, each species in the community has a more even contribution to the abundance than the community on the left which is dominated by a single species.
+
+We can see from this example that we need to consider both species richness and species evenness when we look at species diversity. We can combine species richness and evenness into a diversity indices which is a mathematical index for providing information on community composition. There are series of different diversity indices out there that take these two components into account when you calculate them, which we will cover.
+
+## Species richness
+
+Species richness is the most basic form of diversity indices. It is a measure of the number of species (or other taxonomic level when you cannot identify to species level) present at site or within a sample. Where you have a site with more species present you will have higher species richness than a site with fewer species present. Species richness tends to increase with the area and sampling effort so we need to be careful when we are comparing species richness between locations, habitats or samples because this effort will influence the number of species we find. This is because the longer we search for a species or the more samples we take from an area the more likely we are to encounter more species.
+
+We can calculate species richness is a number of ways:
+
+* total the number of species present in a sample,
+* use an indices which takes into consideration sample size.
+
+A useful species richness which takes into consideration sample size is **Margalef's index**. Margalef's index is based on the number of species present in given sample. More specifically Margalef's index takes into consideration that species richness increases with the total abundance.
+
+$$S_{MG} = \frac{(S-1)}{lnN}$$
+
+where S~MG~ is Margalef's index, _S_ is the number of species, _N_ the total abundance and _ln_ is the natural logarithm.
+
+### Calculating species richness in R
+
+Unfortunately, not all the packages available in R have a full suit of functions that calculate diversity indices. It may be that you have to pick and choose which packages you want to use depending on the diversity indices that you want to calculate.
+
+```{r, exercise = TRUE}
+data(dune)
+
+specnumber(dune)
+
+View(dune)
+
+
+margalef(dune$Achimill)
 ```
-
-## Embedded Application
-
-It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
-
-```{r tabsets, echo=FALSE}
-shinyAppDir(
-  system.file("examples/06_tabsets", package = "shiny"),
-  options = list(
-    width = "100%", height = 550
-  )
-)
-```
-
-Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
-
-You can also use the `shinyApp` function to define an application inline rather then in an external directory.
-
-In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
-
-
-
