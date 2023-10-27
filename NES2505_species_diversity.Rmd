@@ -9,6 +9,8 @@ library(learnr)
 library(mosaic)
 library(vegan)
 library(abdiv)
+
+data(dune)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -61,7 +63,7 @@ where S~MG~ is Margalef's index, _S_ is the number of species, _N_ the total abu
 
 Unfortunately, not all the packages available in R have a full suit of functions that calculate diversity indices. It may be that you have to pick and choose which packages you want to use depending on the diversity indices that you want to calculate.
 
-```{r, exercise = TRUE}
+```{r sr1, exercise = TRUE}
 data(dune)
 
 specnumber(dune)
@@ -71,3 +73,66 @@ View(dune)
 
 margalef(dune$Achimill)
 ```
+
+## Species diversity
+
+Species diversity consists of two components: species richness and species evenness. Species evenness relates to the fact that within a community some species can be rare, common or dominant. When we calculate a species diversity index, we need to take into consideration the relative proportion of each species as well as the number of species present.
+
+There are a lot of indices which you can use to calculate species diversity and there is still contention within the scientific community about which is the best to use. This is to do with the way species diversity indices deal with rare or dominant species. We will look at the 3 most commonly used indices that calculate species diversity in slightly different ways:
+
+* Shannon-Wiener Index (H')
+* Simpson's Index ($\lambda$)
+* Berger-Parker Index
+
+### Shannon-Wiener Index
+
+Shannon-Wiener index (H') is the most commonly used species diversity index. H' represents the uncertainty associated with predicting the identity of a new species given the number of species and evenness of individuals within each species. We can think about this in the context of if we have a community with a single species then we can predict which species we will sample so our uncertainty will be 0. As the number of species in the community increases, we are less likely to predict which species we will sample which means our uncertainty will increase. H' ranges from 0 to 5 but usually falls between 1.5 and 3.5 with higher numbers indicating greater diversity.
+
+H' has **three elements** which need to be considered when interpreting the index. These include: species richness (number of species in the sample), H' and evenness or equitability (J' or E).
+
+H' can be calculated using the following formula:
+
+$$H' = -\sum p_i *lnp_i$$
+
+where _pi_ is the proportional abundance ( _p_ ) for _i_ th species and _ln_ is the natural logarithm.
+
+J' (or E) is calculated using the following formula:
+
+$$J' = H'/lnS$$
+
+where _S_ is the number of species.
+
+J' has a value between 0 and 1. The logic with this index of evenness is that if you remove species richness by dividing _H'_ by _lnS_ you will be left with species evenness. The closer _J'_ is to 1 the more equally abundance each species. 
+
+H' increases with species richness and evenness but it puts more weight on species richness when calculating H' value. The result is that H' can increase when there are more species **OR** where the relative abundance of the different species is more even. This is why it is important to present H', J' and S together to help with the interpretation.
+
+### Simpson's Index ($\lambda$)
+
+Simpson's index ($\lambda$) considers both species richness and evenness **but** is weighted towards the **commonest** or **most dominant species**. It is often referred to as a dominance index and differs to H' which is more influenced by species richness. $\lambda$ considers the probability that two individuals picked at random from an infinitely large community will belong to the same species. Because it is more likely that the dominant species will be sampled, this index is weighted towards the most abundant species.  
+
+We can calculate $\lambda$ by:
+
+$$lambda = 1 -\sum {p_i}^2 $$
+
+where _pi_ is the proportional abundance ( _p_ ) for _i_ th species.
+
+### Berger-Parker Index
+
+Berger-Parker index (d) is a very simple index of dominance. it expresses the proportional abundance of the commonest species.
+
+It can be calculated by:
+
+$$d = \frac{Nmax}{N} $$
+
+where _Nmax_ is the number of individuals in the most abundance species and _N_ is the total number of individuals in a sample. It is often expressed as its reciprocal _1/d_. This means that as the value for _1/d_ increases there is a decrease in dominance and therefore an increase in evenness.
+
+### Calculating species diversity in R
+
+There is no one package that is the best to choose for calculating species diversity when it comes doing it in R. We have used the `vegan` package a lot and this has a function `diversity()` which will calculate H` and $\lambda$. However, if you want J', then you will have to calculate this yourself.
+
+```{r sd1, exercise = TRUE}
+data(dune)
+diversity(dune, index = "shannon")
+
+```
+
