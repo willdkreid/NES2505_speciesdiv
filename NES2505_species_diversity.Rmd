@@ -9,14 +9,16 @@ library(learnr)
 library(mosaic)
 library(vegan)
 library(abdiv)
+library(tidyr)
 
 data(dune)
+dune2 <- read.csv("dune2.csv", header = TRUE, sep=",")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Measuring biological diversity
 
-The focus so far has been on analysing your data either with a statistical test or plotting your data to look at relationships, differences or patterns. But in biology and ecology, we often ask questions related to the distribution and contribution of different species to a community. We have seen with the ordination methods that we can reduced the dimensional of our species data into (relatively) easily interpretable figures where we can see sites are grouped together or that species close in ordination spaces are likely to co-occur. However, there times when it will be important to calculate a **diversity indices** for a sample, habitat or ecosystem. This often relates to understanding ecosystem health or monitoring complex communities over time and space. If our diversity metrics change in time and/ or space it will mean that the number of species and the relative abundance of these species are changing.
+The focus so far has been on analysing your data either with a statistical test or plotting your data to look at relationships, differences or patterns. But in biology and ecology, we often ask questions related to the distribution and contribution of different species to a community. We have seen with the ordination methods that we can reduced the dimensional of our species data into (relatively) easily interpretable figures where we can see sites are grouped together or that species close in ordination space are likely to co-occur. However, there times when it will be important to calculate a **diversity index** for a sample, habitat or ecosystem.
 
 Ecological communities are complex. It is important to examine the diversity of communities for different reasons:
 
@@ -32,6 +34,8 @@ This means that we can start to ask questions related to what is driving the div
 * does MPA designation increase diversity and ecosystem health compared to unprotected areas?
 * what is the impact of a fisheries on pelagic diversity?
 
+We calculate diversity indices in order to understand ecosystem health or monitor complex communities over time and space. If our diversity indices change in time and/ or space it will mean that the number of species and the relative abundance of these species are changing.
+
 ### What is species diversity?
 
 Species diversity is an expression of community structure. Species diversity is split into two components: **species richness** and **species evenness**. Species richness is the total number of species in a quantified area or sample. Species evenness is the relative abundance of individuals within a community or sample. 
@@ -42,7 +46,7 @@ We can show what we mean by species richness and species evenness in the figure 
 
 The answer is the community on the right. This is because, although there is the same species rich, each species in the community has a more even contribution to the abundance than the community on the left which is dominated by a single species.
 
-We can see from this example that we need to consider both species richness and species evenness when we look at species diversity. We can combine species richness and evenness into a diversity indices which is a mathematical index for providing information on community composition. There are series of different diversity indices out there that take these two components into account when you calculate them, which we will cover.
+We can see from this example that we need to consider both species richness and species evenness when we look at species diversity. We can combine species richness and evenness into a diversity indices which is a mathematical index for providing information on community composition. There are a series of different diversity indices out there that take these two components into account when you calculate them, which we will cover.
 
 ## Species richness
 
@@ -51,7 +55,7 @@ Species richness is the most basic form of diversity indices. It is a measure of
 We can calculate species richness is a number of ways:
 
 * total the number of species present in a sample,
-* use an indices which takes into consideration sample size.
+* use an index of species richness which takes into consideration sample size.
 
 A useful species richness which takes into consideration sample size is **Margalef's index**. Margalef's index is based on the number of species present in given sample. More specifically Margalef's index takes into consideration that species richness increases with the total abundance.
 
@@ -61,18 +65,57 @@ where S~MG~ is Margalef's index, _S_ is the number of species, _N_ the total abu
 
 ### Calculating species richness in R
 
-Unfortunately, not all the packages available in R have a full suit of functions that calculate diversity indices. It may be that you have to pick and choose which packages you want to use depending on the diversity indices that you want to calculate.
+Unfortunately, not all the packages available in R have a full suite of functions that calculate diversity indices. It may be that you have to pick and choose which packages you want to use depending on the diversity indices that you want to calculate.
+
+The `vegan` package has the function `specnumber` which finds the number of species in a data set. We will use the `dune` data set as an example.
 
 ```{r sr1, exercise = TRUE}
+# load the dune data set
 data(dune)
 
+# calculate the number of species for each site
 specnumber(dune)
 
-View(dune)
-
-
-margalef(dune$Achimill)
 ```
+
+We can see for site 1 there are 5 species present while the maximum number of species is 14 which is found at site 5. This would mean that site 5 has the greatest species richness in this data set.
+
+We can use the `abdiv` package to calculate Margalef's index of species richness using the `margalef()` function. We have to manipulate the dune data set first so that the sites are in columns and the rows are species. I have edited the dune data set so that it is easier to use for this example and have called it `dune2`.
+
+```{r sr2, exercise = TRUE}
+# see how these data are structured
+head(dune2)
+
+# more efficient to get the data into a format to calculate Margalef's index for all sites
+dune2_long <- pivot_longer(
+  data = dune2,
+  cols = site_01:site_20,
+  names_to = "Sites",
+  values_to = "Count"
+)
+
+# calculate Margalef's index of species richness
+# use group_by() function to group the data set by sites
+# use summarise() function to calculate the Margalef's Index for the whole data set
+# in the brackets name the new column "margalef_index" then use the margalef() 
+# function from the abdiv to calculate Margalef's Index based on the data in 
+# the Count column
+marg_div <- group_by(dune2_long, Sites) %>% summarise(margalef_index = margalef(Count)) %>% arrange(., !desc(Sites))
+
+# bind the Margalef's index to the environmental data and plot
+data(dune.env)
+marg_div2 <- cbind(dune.env,marg_div)
+
+# look at differences between management types
+gf_boxplot(margalef_index ~ Management, ylab = "Margalef's index", data = marg_div2) %>%
+  gf_theme(theme_classic())
+
+# look at the relationship between thickness of soil A1 horizon and Margalef's index
+gf_point(margalef_index ~ A1, ylab = "Margalef's index", data = marg_div2) %>%
+  gf_theme(theme_classic())
+```
+
+We can now undertake a statistical analysis on to see whether there are significant differences in Margalef's index among the different management types. This can be done using a linear model with continuous or categorical variables. 
 
 ## Species diversity
 
@@ -114,11 +157,11 @@ We can calculate $\lambda$ by:
 
 $$lambda = 1 -\sum {p_i}^2 $$
 
-where _pi_ is the proportional abundance ( _p_ ) for _i_ th species.
+where _pi_ is the proportional abundance ( _p_ ) for _i_ th species. The closer to 1 the greater the diversity.
 
 ### Berger-Parker Index
 
-Berger-Parker index (d) is a very simple index of dominance. it expresses the proportional abundance of the commonest species.
+Berger-Parker index (d) is a very simple index of dominance. It expresses the proportional abundance of the commonest species.
 
 It can be calculated by:
 
@@ -131,8 +174,38 @@ where _Nmax_ is the number of individuals in the most abundance species and _N_ 
 There is no one package that is the best to choose for calculating species diversity when it comes doing it in R. We have used the `vegan` package a lot and this has a function `diversity()` which will calculate H` and $\lambda$. However, if you want J', then you will have to calculate this yourself.
 
 ```{r sd1, exercise = TRUE}
+# load the dune data we want to use
 data(dune)
-diversity(dune, index = "shannon")
+data(dune.env)
 
+# calculate the diversity estimates for Shannon diversity (H)
+H <- diversity(dune, index = "shannon")
+
+# we cannot calculate evenness (J) directly so need the following calculation
+J <- H/log(specnumber(dune))
+
+# calculate the diversity estimates for Shannon diversity (lambda)
+lambda <- diversity(dune, index = "simpson")
+
+# bind the 2 vectors with the environmental data using cbind()
+div_index <- cbind(dune.env,H,J,lambda)
+
+# look at differences between management types
+gf_boxplot(H ~ Management, ylab = "Shannon diversity", data = div_index) %>%
+  gf_theme(theme_classic())
+
+# look at the relationship between thickness of soil A1 horizon and Shannon diversity
+gf_point(H ~ A1, ylab = "Shannon diversity", data = div_index) %>%
+  gf_theme(theme_classic())
 ```
 
+It is possible to construct a hypothesis that we want to test based on these species diversity indices. For example:
+
+* Null hypothesis: there is no statistical difference in Shannon diversity among the management types.
+* Alternate hypothesis: there is no statistical difference in Shannon diversity among the management types.
+
+We can now undertake a statistical analysis to test these hypotheses using a linear model with continuous or categorical variables. The response variable will be your diversity index and your explanatory variables will be your environmental variables or sites if they can be grouped together.
+
+## Summary
+
+Diversity indices are important measures of community composition. They are good for understanding whether communities are different or similar but they need to be used with caution. It is best to combine the use of diversity indices with multivariate analyses to have a deeper interpretation of the diversity indices.
