@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Measuring biological diversity
 
-The focus so far has been on analysing your data either with a statistical test or plotting your data to look at relationships, differences or patterns. But in biology and ecology, we often ask questions related to the distribution and contribution of different species to a community. We have seen with the ordination methods that we can reduced the dimensional of our species data into (relatively) easily interpretable figures where we can see sites are grouped together or that species close in ordination space are likely to co-occur. However, there times when it will be important to calculate a **diversity index** for a sample, habitat or ecosystem.
+The focus so far has been on analysing your data  with a statistical test or plotting your data to look at relationships, differences or patterns. But in biology and ecology, we often ask questions related to the distribution and contribution of different species to a community. We have seen with the ordination methods that we can reduced the dimensionality of our species data into (relatively) easily interpretable figures where we can see whether sites are grouped together or that species close in ordination space are likely to co-occur. However, there times when it will be important to calculate a **diversity index** for a sample or habitat.
 
 Ecological communities are complex. It is important to examine the diversity of communities for different reasons:
 
@@ -30,7 +30,7 @@ Ecological communities are complex. It is important to examine the diversity of 
 This means that we can start to ask questions related to what is driving the diversity of communities like:
 
 * what is the long-term impact of nutrient loading on the diversity of macroalgae in an estuary?
-* what is the relationship habitat heterogeneity and benthic diversity on the Antarctic Peninsula?
+* what is the relationship between habitat heterogeneity and benthic diversity on the Antarctic Peninsula?
 * does MPA designation increase diversity and ecosystem health compared to unprotected areas?
 * what is the impact of a fisheries on pelagic diversity?
 
@@ -50,7 +50,7 @@ We can see from this example that we need to consider both species richness and 
 
 ## Species richness
 
-Species richness is the most basic form of diversity indices. It is a measure of the number of species (or other taxonomic level when you cannot identify to species level) present at site or within a sample. Where you have a site with more species present you will have higher species richness than a site with fewer species present. Species richness tends to increase with the area and sampling effort so we need to be careful when we are comparing species richness between locations, habitats or samples because this effort will influence the number of species we find. This is because the longer we search for a species or the more samples we take from an area the more likely we are to encounter more species.
+Species richness is the most basic form of diversity indices. It is a measure of the number of species (or other taxonomic level when you cannot identify to species) present at site or within a sample. Where you have a site with more species present you will have higher species richness than a site with fewer species present. Species richness tends to increase with the area and sampling effort so we need to be careful when we are comparing species richness between locations, habitats or samples because this effort will influence the number of species we find. This is because the longer we search for a species or the more samples we take from an area the more likely we are to encounter more species.
 
 We can calculate species richness is a number of ways:
 
@@ -115,7 +115,7 @@ gf_point(margalef_index ~ A1, ylab = "Margalef's index", data = marg_div2) %>%
   gf_theme(theme_classic())
 ```
 
-We can now undertake a statistical analysis on to see whether there are significant differences in Margalef's index among the different management types. This can be done using a linear model with continuous or categorical variables. 
+We can now undertake a statistical analysis to see whether there are significant differences in Margalef's index among the different management types. This can be done using a linear model with continuous or categorical variables. 
 
 ## Species diversity
 
@@ -208,4 +208,4 @@ We can now undertake a statistical analysis to test these hypotheses using a lin
 
 ## Summary
 
-Diversity indices are important measures of community composition. They are good for understanding whether communities are different or similar but they need to be used with caution. It is best to combine the use of diversity indices with multivariate analyses to have a deeper interpretation of the diversity indices.
+Diversity indices are important measures of community composition. They are good for understanding whether communities are different or similar but they need to be used with caution. It is best to combine the use of diversity indices with multivariate analyses to have a deeper interpretation of what is happening with the community you are investigating.
